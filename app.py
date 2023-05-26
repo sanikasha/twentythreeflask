@@ -56,8 +56,6 @@ class MySongs(db.Model):
 from flask import jsonify
 
 @app.route('/songdatabase')
-
-@app.route('/songdatabase')
 def songdatabase():
     # Fetch data from the songs table into a DataFrame
     df = pd.read_sql_table('songs', db.engine)
