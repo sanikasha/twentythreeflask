@@ -11,7 +11,6 @@ from model.players import initPlayers
 # from model.song_data import db
 from flask import Flask
 
-
 # setup APIs
 from api.covid import covid_api # Blueprint import api definition
 from api.joke import joke_api # Blueprint import api definition
@@ -131,6 +130,8 @@ class MySongs(db.Model):
         self.acousticness = acousticness
         self.speechiness = speechiness
         self.popularity = popularity
+    
+   
 
 from flask import jsonify
 
@@ -145,6 +146,54 @@ def songdatabase():
     # Return a JSON response
     return jsonify(data)
 
+from flask import request
+import json
+from flask import Blueprint, request, jsonify
+#from flask_restful import Api, Resource # used for REST API building
+
+
+def write_sql_table(table_name):
+    from flask import request
+    # Retrieve the data from the request
+    body = request.get_json()
+    title = body.get('title')
+    artist =  body.get('artist')
+    top_genre =  body.get('top_genre')
+    year=  body.get('year')
+    bpm =  body.get('bpm')
+    energy =  body.get('energy')
+    danceability =  body.get('danceability')
+    loudness  =  body.get('loudness')
+    liveness =  body.get('liveness')
+    valence =  body.get('valence')
+    duration =  body.get('duration')
+    acousticness =  body.get('acousticness')
+    speechiness =  body.get('speechiness')
+    popularity =  body.get('popularity')
+
+    # Retrieve other necessary data from the request
+
+    # Construct the SQL insert statement
+    insert_statement = f"INSERT INTO {table_name} (title, artist, top_genre, year, bpm, energy, " \
+                       f"danceability, loudness, liveness, valence, duration, acousticness, speechiness, popularity) " \
+                       f"VALUES (:title, :artist, :top_genre, :year, :bpm, :energy, :danceability, " \
+                       f":loudness, :liveness, :valence, :duration, :acousticness, :speechiness, :popularity)"
+
+    
+    # Execute the insert statement with the provided data
+    db.session.execute(insert_statement, {'title': title, 'artist': artist, 'top_genre': top_genre, 'year': year,
+                                          'bpm': bpm, 'energy': energy, 'danceability': danceability,
+                                          'loudness': loudness, 'liveness': liveness, 'valence': valence,
+                                          'duration': duration, 'acousticness': acousticness,
+                                          'speechiness': speechiness, 'popularity': popularity})
+    
+    # Commit the changes to the database
+    db.session.commit()
+
+# Usage example:
+@app.route('/create', methods=['POST'])
+def create():
+    write_sql_table('songs')
 
 # this runs the application on the development server
 if __name__ == "__main__":
