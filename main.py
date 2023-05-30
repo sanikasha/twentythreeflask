@@ -205,11 +205,32 @@ def write_sql_table(table_name):
     # Commit the changes to the database
     db.session.commit()
 
+# delete function is below
+def delete_sql_table(table_name, title):
+    # Construct the SQL delete statement
+    delete_statement = f"DELETE FROM {table_name} " \
+                       f"WHERE title = :title"
+
+    # Execute the delete statement with the provided data
+    db.session.execute(delete_statement, {'title': title})
+
+    # Commit the changes to the database
+    db.session.commit()
 
 # Usage example:
 @app.route('/create', methods=['POST'])
 def create():
     write_sql_table('songs')
+
+@app.route('/delete', methods=['DELETE'])
+def delete():
+    # Check if the request contains JSON data
+    if request.is_json:
+        body = request.get_json()
+        title = body.get('title')
+        delete_sql_table('songs', title)
+    else:
+        return jsonify({'error': 'Invalid JSON data'})
 
 # this runs the application on the development server
 if __name__ == "__main__":
