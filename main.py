@@ -157,21 +157,23 @@ def write_sql_table(table_name):
     # Retrieve the data from the request
     body = request.get_json()
     title = body.get('title')
-    artist =  body.get('artist')
-    top_genre =  body.get('top_genre')
-    year=  body.get('year')
-    bpm =  body.get('bpm')
-    energy =  body.get('energy')
-    danceability =  body.get('danceability')
-    loudness  =  body.get('loudness')
-    liveness =  body.get('liveness')
-    valence =  body.get('valence')
-    duration =  body.get('duration')
-    acousticness =  body.get('acousticness')
-    speechiness =  body.get('speechiness')
-    popularity =  body.get('popularity')
+    artist = body.get('artist')
+    top_genre = body.get('top_genre')
+    year = body.get('year')
+    bpm = body.get('bpm')
+    energy = body.get('energy')
+    danceability = body.get('danceability')
+    loudness = body.get('loudness')
+    liveness = body.get('liveness')
+    valence = body.get('valence')
+    duration = body.get('duration')
+    acousticness = body.get('acousticness')
+    speechiness = body.get('speechiness')
+    popularity = body.get('popularity')
 
-    # Retrieve other necessary data from the request
+    # Check for null values
+    if None in (title, artist, top_genre, year, bpm, energy, danceability, loudness, liveness, valence, duration, acousticness, speechiness, popularity):
+        return jsonify({'message': 'Cannot insert row with null values'})
 
     # Construct the SQL insert statement
     insert_statement = f"INSERT INTO {table_name} (title, artist, top_genre, year, bpm, energy, " \
@@ -179,16 +181,30 @@ def write_sql_table(table_name):
                        f"VALUES (:title, :artist, :top_genre, :year, :bpm, :energy, :danceability, " \
                        f":loudness, :liveness, :valence, :duration, :acousticness, :speechiness, :popularity)"
 
-    
     # Execute the insert statement with the provided data
-    db.session.execute(insert_statement, {'title': title, 'artist': artist, 'top_genre': top_genre, 'year': year,
-                                          'bpm': bpm, 'energy': energy, 'danceability': danceability,
-                                          'loudness': loudness, 'liveness': liveness, 'valence': valence,
-                                          'duration': duration, 'acousticness': acousticness,
-                                          'speechiness': speechiness, 'popularity': popularity})
-    
+    db.session.execute(
+        insert_statement,
+        {
+            'title': title,
+            'artist': artist,
+            'top_genre': top_genre,
+            'year': year,
+            'bpm': bpm,
+            'energy': energy,
+            'danceability': danceability,
+            'loudness': loudness,
+            'liveness': liveness,
+            'valence': valence,
+            'duration': duration,
+            'acousticness': acousticness,
+            'speechiness': speechiness,
+            'popularity': popularity
+        }
+    )
+
     # Commit the changes to the database
     db.session.commit()
+
 
 # Usage example:
 @app.route('/create', methods=['POST'])
