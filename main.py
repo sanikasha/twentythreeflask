@@ -207,6 +207,8 @@ def write_sql_table(table_name):
 
 # delete function is below
 def delete_sql_table(table_name, title):
+    if None in (title):
+        return jsonify({'message': 'Cannot delete row with null values'})
     # Construct the SQL delete statement
     delete_statement = f"DELETE FROM {table_name} " \
                        f"WHERE title = :title"
