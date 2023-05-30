@@ -137,6 +137,7 @@ from flask import jsonify
 
 @app.route('/songdatabase')
 def songdatabase():
+    delete_null_and_nan_values()
     # Fetch data from the songs table into a DataFrame
     df = pd.read_sql_table('songs', db.engine)
 
@@ -226,15 +227,7 @@ import math
 
 def delete_null_and_nan_values():
     # Construct the SQL delete statement to delete rows with null or NaN values
-    delete_statement = "DELETE FROM songs WHERE " \
-                       "(title IS NULL OR artist IS NULL OR top_genre IS NULL OR year IS NULL OR " \
-                       "bpm IS NULL OR energy IS NULL OR danceability IS NULL OR loudness IS NULL OR " \
-                       "liveness IS NULL OR valence IS NULL OR duration IS NULL OR acousticness IS NULL OR " \
-                       "speechiness IS NULL OR popularity IS NULL) OR " \
-                       "(title = 'NaN' OR artist = 'NaN' OR top_genre = 'NaN' OR year = 'NaN' OR " \
-                       "bpm = 'NaN' OR energy = 'NaN' OR danceability = 'NaN' OR loudness = 'NaN' OR " \
-                       "liveness = 'NaN' OR valence = 'NaN' OR duration = 'NaN' OR acousticness = 'NaN' OR " \
-                       "speechiness = 'NaN' OR popularity = 'NaN')"
+    delete_statement = "DELETE FROM songs WHERE title = 'jiya'"
 
     # Execute the delete statement to remove rows with null or NaN values
     db.session.execute(delete_statement)
