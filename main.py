@@ -246,10 +246,12 @@ def delete_null_and_nan_values():
 # Usage example:
 @app.route('/create', methods=['POST'])
 def create():
+    delete_null_and_nan_values()
     write_sql_table('songs')
 
 @app.route('/delete', methods=['DELETE'])
 def delete():
+    delete_null_and_nan_values()
     # Check if the request contains JSON data
     if request.is_json:
         body = request.get_json()
