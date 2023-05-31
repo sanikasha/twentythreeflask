@@ -11,7 +11,6 @@ from model.players import initPlayers
 # from model.song_data import db
 from flask import Flask
 
-
 # setup APIs
 from api.covid import covid_api # Blueprint import api definition
 from api.joke import joke_api # Blueprint import api definition
@@ -131,11 +130,14 @@ class MySongs(db.Model):
         self.acousticness = acousticness
         self.speechiness = speechiness
         self.popularity = popularity
+    
+   
 
 from flask import jsonify
 
 @app.route('/songdatabase')
 def songdatabase():
+    delete_null_and_nan_values()
     # Fetch data from the songs table into a DataFrame
     df = pd.read_sql_table('songs', db.engine)
 
@@ -145,6 +147,111 @@ def songdatabase():
     # Return a JSON response
     return jsonify(data)
 
+from flask import request
+import json
+from flask import Blueprint, request, jsonify
+#from flask_restful import Api, Resource # used for REST API building
+
+
+def write_sql_table(table_name):
+    delete_null_and_nan_values()
+    from flask import request
+    # Retrieve the data from the request
+    body = request.get_json()
+    title = body.get('title')
+    artist = body.get('artist')
+    top_genre = body.get('top_genre')
+    year = body.get('year')
+    bpm = body.get('bpm')
+    energy = body.get('energy')
+    danceability = body.get('danceability')
+    loudness = body.get('loudness')
+    liveness = body.get('liveness')
+    valence = body.get('valence')
+    duration = body.get('duration')
+    acousticness = body.get('acousticness')
+    speechiness = body.get('speechiness')
+    popularity = body.get('popularity')
+
+    # Check for null values
+    if None in (title, artist, top_genre, year, bpm, energy, danceability, loudness, liveness, valence, duration, acousticness, speechiness, popularity):
+        return jsonify({'message': 'Cannot insert row with null values'})
+
+    # Construct the SQL insert statement
+    insert_statement = f"INSERT INTO {table_name} (title, artist, top_genre, year, bpm, energy, " \
+                       f"danceability, loudness, liveness, valence, duration, acousticness, speechiness, popularity) " \
+                       f"VALUES (:title, :artist, :top_genre, :year, :bpm, :energy, :danceability, " \
+                       f":loudness, :liveness, :valence, :duration, :acousticness, :speechiness, :popularity)"
+
+    # Execute the insert statement with the provided data
+    db.session.execute(
+        insert_statement,
+        {
+            'title': title,
+            'artist': artist,
+            'top_genre': top_genre,
+            'year': year,
+            'bpm': bpm,
+            'energy': energy,
+            'danceability': danceability,
+            'loudness': loudness,
+            'liveness': liveness,
+            'valence': valence,
+            'duration': duration,
+            'acousticness': acousticness,
+            'speechiness': speechiness,
+            'popularity': popularity
+        }
+    )
+
+    # Commit the changes to the database
+    db.session.commit()
+
+# delete function is below
+def delete_sql_table(table_name, title):
+    delete_null_and_nan_values()
+    if None in (title):
+        return jsonify({'message': 'Cannot delete row with null values'})
+    # Construct the SQL delete statement
+    delete_statement = f"DELETE FROM {table_name} " \
+                       f"WHERE title = :title"
+
+    # Execute the delete statement with the provided data
+    db.session.execute(delete_statement, {'title': title})
+
+    # Commit the changes to the database
+    db.session.commit()
+
+# checks for null and NaN (not a number) values
+import math
+
+def delete_null_and_nan_values():
+    # Construct the SQL delete statement to delete rows with null or NaN values
+    delete_statement = "DELETE FROM songs WHERE title = 'jiya'"
+
+    # Execute the delete statement to remove rows with null or NaN values
+    db.session.execute(delete_statement)
+
+    # Commit the changes to the database
+    db.session.commit()
+
+
+# Usage example:
+@app.route('/create', methods=['POST'])
+def create():
+    delete_null_and_nan_values()
+    write_sql_table('songs')
+
+@app.route('/delete', methods=['DELETE'])
+def delete():
+    delete_null_and_nan_values()
+    # Check if the request contains JSON data
+    if request.is_json:
+        body = request.get_json()
+        title = body.get('title')
+        delete_sql_table('songs', title)
+    else:
+        return jsonify({'error': 'Invalid JSON data'})
 
 # this runs the application on the development server
 if __name__ == "__main__":
