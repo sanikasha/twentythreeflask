@@ -146,7 +146,6 @@ def songdatabase():
     return jsonify(data)
 
 def write_sql_table(table_name):
-    delete_null_and_nan_values()
     from flask import request
     # Retrieve the data from the request
     body = request.get_json()
